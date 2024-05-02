@@ -4,10 +4,10 @@ using UnityEngine;
 
 public abstract class PlayerBaseState : State
 {
-    public PlayerBaseState(PlayerStateMachine stateMachine)
+    public PlayerBaseState(PlayerStateMachine playerStateMachine)
     {
-        StateMachine = stateMachine;
+        PlayerStateMachine = playerStateMachine;
     }
 
-    protected PlayerStateMachine StateMachine { get; }
+    protected PlayerStateMachine PlayerStateMachine { get; }
 }
