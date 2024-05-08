@@ -5,25 +5,35 @@ using UnityEngine;
 public class PlayerFreeLookState : PlayerBaseState
 {
     private const float AnimatorDampTime = 0.1f;
+    private const float CrossFadeDuration = 0.1f;
+
     private readonly static int FreeLookSpeedHash = Animator.StringToHash("FreeLookSpeed");
+    private readonly static int FreeLookBlendTreeHash = Animator.StringToHash("FreeLookBlendTree");
 
     public PlayerFreeLookState(PlayerStateMachine stateMachine) : base(stateMachine) { }
 
     public override void Enter()
     {
-
+        PlayerStateMachine.InputReader.TargetEvent += OnTarget;
+        PlayerStateMachine.Animator.CrossFadeInFixedTime(FreeLookBlendTreeHash, CrossFadeDuration);
     }
 
     public override void Exit()
     {
-
+        PlayerStateMachine.InputReader.TargetEvent -= OnTarget;
     }
 
     public override void Tick(float deltaTime)
     {
+        if (PlayerStateMachine.InputReader.IsAttacking)
+        {
+            PlayerStateMachine.SwitchState(new PlayerAttackingState(PlayerStateMachine, 0));
+            return;
+        }
+
         Vector3 movement = CalculateMovement();
 
-        PlayerStateMachine.CharacterController.Move(movement * PlayerStateMachine.FreeLookMovementSpeed * deltaTime);
+        Move(movement * PlayerStateMachine.FreeLookMovementSpeed, deltaTime);
 
         if (PlayerStateMachine.InputReader.MovementValue == Vector2.zero)
         {
@@ -49,5 +59,13 @@ public class PlayerFreeLookState : PlayerBaseState
         forward.Normalize();
         right.Normalize();
         return forward * PlayerStateMachine.InputReader.MovementValue.y + right * PlayerStateMachine.InputReader.MovementValue.x;
+    }
+
+    private void OnTarget()
+    {
+        if (PlayerStateMachine.Targeter.SelectTarget() == false)
+            return;
+
+        PlayerStateMachine.SwitchState(new PlayerTargetingState(PlayerStateMachine));
     }
 }
