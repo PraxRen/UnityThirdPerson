@@ -32,6 +32,11 @@ public class PlayerTargetingState : PlayerBaseState
             return;
         }
 
+        if (PlayerStateMachine.InputReader.IsBlocking)
+        {
+            PlayerStateMachine.SwitchState(new PlayerBlockingState(PlayerStateMachine));
+        }
+
         if (PlayerStateMachine.Targeter.CurrentTarget == null)
         {
             PlayerStateMachine.SwitchState(new PlayerFreeLookState(PlayerStateMachine));

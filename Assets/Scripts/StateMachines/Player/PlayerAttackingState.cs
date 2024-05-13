@@ -16,7 +16,7 @@ public class PlayerAttackingState : PlayerBaseState
 
     public override void Enter()
     {
-        PlayerStateMachine.WeaponDamage.SetAttack(_attack.Damage);
+        PlayerStateMachine.WeaponDamage.SetAttack(_attack.Damage, _attack.Knockback);
         PlayerStateMachine.Animator.CrossFadeInFixedTime(_attack.AnimationName, _attack.TransitionDuration);
     }
 
@@ -29,7 +29,7 @@ public class PlayerAttackingState : PlayerBaseState
     {
         Move(deltaTime);
         FaceTarget();
-        float normalizedTime = GetNormalizedTime();
+        float normalizedTime = GetNormalizedTime(PlayerStateMachine.Animator);
 
         if (normalizedTime >= _previousFrameTime && normalizedTime < 1f)
         {
@@ -76,24 +76,5 @@ public class PlayerAttackingState : PlayerBaseState
 
         PlayerStateMachine.ForceReceiver.AddForce(PlayerStateMachine.transform.forward * _attack.Force);
         _alreadyAppliedForce = true;
-    }
-
-    private float GetNormalizedTime()
-    {
-        AnimatorStateInfo currentInfo = PlayerStateMachine.Animator.GetCurrentAnimatorStateInfo(0);
-        AnimatorStateInfo nextInfo = PlayerStateMachine.Animator.GetNextAnimatorStateInfo(0);
-
-        if (PlayerStateMachine.Animator.IsInTransition(0) && nextInfo.IsTag("Attack"))
-        {
-            return nextInfo.normalizedTime;
-        }
-        else if (!PlayerStateMachine.Animator.IsInTransition(0) && currentInfo.IsTag("Attack"))
-        {
-            return currentInfo.normalizedTime;
-        }
-        else
-        {
-            return 0;
-        }
     }
 }

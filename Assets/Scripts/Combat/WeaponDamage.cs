@@ -8,6 +8,7 @@ public class WeaponDamage : MonoBehaviour
 
     private List<Collider> _alreadyColliderWith = new List<Collider>();
     private int _damage;
+    private float _knockback;
 
     private void OnEnable()
     {
@@ -26,13 +27,19 @@ public class WeaponDamage : MonoBehaviour
 
         if (other.TryGetComponent(out Health health))
         {
-            Debug.Log(other.transform.name);
             health.DealDamage(_damage);
+        }
+
+        if (other.TryGetComponent(out ForceReceiver forceReceiver))
+        {
+            Vector3 direction = (other.transform.position - myCollider.transform.position).normalized;
+            forceReceiver.AddForce(direction * _knockback);
         }
     }
 
-    public void SetAttack(int damage)
+    public void SetAttack(int damage, float knockback)
     {
         _damage = damage;
+        _knockback = knockback;
     }
 }
