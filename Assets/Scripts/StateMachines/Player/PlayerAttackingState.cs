@@ -29,7 +29,7 @@ public class PlayerAttackingState : PlayerBaseState
     {
         Move(deltaTime);
         FaceTarget();
-        float normalizedTime = GetNormalizedTime(PlayerStateMachine.Animator);
+        float normalizedTime = GetNormalizedTime(PlayerStateMachine.Animator, "Attack");
 
         if (normalizedTime >= _previousFrameTime && normalizedTime < 1f)
         {

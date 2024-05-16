@@ -15,13 +15,17 @@ public class PlayerTargetingState : PlayerBaseState
 
     public override void Enter()
     {
-        PlayerStateMachine.InputReader.CancelEvent += OnCancel;
+        PlayerStateMachine.InputReader.TargetEvent += OnTarget;
+        PlayerStateMachine.InputReader.DodgeEvent += OnDodge;
+        PlayerStateMachine.InputReader.JumpEvent += OnJump;
         PlayerStateMachine.Animator.CrossFadeInFixedTime(TargetingBlendTreeHash, CrossFadeDuration);
     }
 
     public override void Exit()
     {
-        PlayerStateMachine.InputReader.CancelEvent -= OnCancel;
+        PlayerStateMachine.InputReader.TargetEvent -= OnTarget;
+        PlayerStateMachine.InputReader.DodgeEvent -= OnDodge;
+        PlayerStateMachine.InputReader.JumpEvent -= OnJump;
     }
 
     public override void Tick(float deltaTime)
@@ -43,19 +47,32 @@ public class PlayerTargetingState : PlayerBaseState
             return;
         }
 
-        Vector3 movement = CalculateMovement();
+        Vector3 movement = CalculateMovement(deltaTime);
         Move(movement * PlayerStateMachine.TargetingMovementSpeed, deltaTime);
         UpdateAnimator(deltaTime);
         FaceTarget();
     }
 
-    private void OnCancel()
+    private void OnTarget()
     {
         PlayerStateMachine.Targeter.Cancel();
         PlayerStateMachine.SwitchState(new PlayerFreeLookState(PlayerStateMachine));
     }
 
-    private Vector3 CalculateMovement()
+    private void OnDodge()
+    {
+        if (PlayerStateMachine.InputReader.MovementValue == Vector2.zero)
+            return;
+
+        PlayerStateMachine.SwitchState(new PlayerDodgingState(PlayerStateMachine, PlayerStateMachine.InputReader.MovementValue));
+    }
+
+    private void OnJump()
+    {
+        PlayerStateMachine.SwitchState(new PlayerJumpingState(PlayerStateMachine));
+    }
+
+    private Vector3 CalculateMovement(float deltaTime)
     {
         Vector3 movement = new Vector3();
         movement += PlayerStateMachine.transform.right * PlayerStateMachine.InputReader.MovementValue.x;
